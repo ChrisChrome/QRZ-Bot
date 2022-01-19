@@ -18,6 +18,8 @@
   "homepage": "https://github.com/ChrisChrome/QRZ-Bot#readme",
   "dependencies": {
     "axios": "^0.25.0",
-    "discord.js": "^13.6.0"
+    "discord.js": "^13.6.0",
+    "osm-static-maps": "^3.10.3",
+    "puppeteer": "^13.1.1"
   }
 }

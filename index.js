@@ -1,9 +1,11 @@
 const Discord = require("discord.js");
+const osmsm = require('osm-static-maps');
 const axios = require("axios").default;
 const config = require("./config.json");
 const bot = new Discord.Client({
 	intents: ["GUILD_MESSAGES", "GUILD_BANS", "GUILD_MEMBERS", "GUILD_INVITES", "GUILDS"]
 });
+const fs = require("fs");
 
 bot.on('ready', () => {
 	console.log(`Logged in as ${bot.user.tag}`);
@@ -36,41 +38,61 @@ bot.on("messageCreate", (msg) => {
 					}).then((resp) => {
 						data = resp.data;
 						if (data.status == "INVALID") return msg1.edit("Callsign invalid!")
-						msg1.edit({
-							"content": null,
-							"embeds": [{
-								//"title": data.name,
-								"color": 36863,
-								"description": data.current.operClass,
-								"fields": [{
-										"name": "Address",
-										"value": `${data.name}\n${data.address.line1}\n${data.address.line2}\n${data.address.attn}`
-									},
+						osmsm({
+							geojson: {
+								type: "Point",
+								coordinates: [data.location.longitude,data.location.latitude]
+							},
+							"zoom": 11,
+							"type": "png",
+							"attribution": "QRZ Bot | KO4WAL"
+						}).then((imgBuf) => {
+							msg1.edit({
+								"files": [
 									{
-										"name": "Status",
-										"value": data.status,
-										"inline": true
-									},
-									{
-										"name": "Type",
-										"value": data.type,
-										"inline": true
-									},
-									{
-										"name": "Grant Date",
-										"value": `${data.otherInfo.grantDate}-${data.otherInfo.expiryDate}`,
-										"inline": true
+										attachment: imgBuf,
+										name: "map.png",
+										file: imgBuf
 									}
 								],
-								"author": {
-									"name": data.current.callsign,
-									"url": data.otherInfo.ulsUrl
-								},
-								"footer": {
-									"text": `FRN: ${data.otherInfo.frn}`
-								},
-								"timestamp": new Date()
-							}]
+								"content": null,
+								"embeds": [{
+									"image": {
+										"url": `attachment://map.png`
+									},
+									//"title": data.name,
+									"color": 36863,
+									"description": data.current.operClass,
+									"fields": [{
+											"name": "Address",
+											"value": `${data.name}\n${data.address.line1}\n${data.address.line2}\n${data.address.attn}`
+										},
+										{
+											"name": "Status",
+											"value": data.status,
+											"inline": true
+										},
+										{
+											"name": "Type",
+											"value": data.type,
+											"inline": true
+										},
+										{
+											"name": "Grant Date",
+											"value": `${data.otherInfo.grantDate}-${data.otherInfo.expiryDate}`,
+											"inline": true
+										}
+									],
+									"author": {
+										"name": data.current.callsign,
+										"url": data.otherInfo.ulsUrl
+									},
+									"footer": {
+										"text": `FRN: ${data.otherInfo.frn}`
+									},
+									"timestamp": new Date()
+								}]
+							})
 						})
 					})
 				})
