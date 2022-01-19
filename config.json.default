@@ -1,0 +1,13 @@
+{
+	"discord": {
+		"token": "",
+		"status": {
+			"status": "online",
+			"activities": [{
+				"type": "LISTENING",
+				"name": "146.52 MHz"
+			}]
+		}
+	},
+	"owners": ["put your user ID here"]
+}
